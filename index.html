@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dicionário de Dados — Sistema de Gestão Contratual</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-title">Sistema de Gestão Contratual — Dicionário de Dados</div>
+    <div class="topbar-actions">
+      <button id="theme-toggle" class="btn-icon" aria-label="Alternar tema">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar">
+      <h3>Tabelas</h3>
+      <a href="#advogado">advogado</a>
+      <a href="#audiencia">audiencia</a>
+      <a href="#cliente">cliente</a>
+      <a href="#comarca">comarca</a>
+      <a href="#consentimento_lgpd">consentimento_lgpd</a>
+      <a href="#contrato">contrato</a>
+      <a href="#documento">documento</a>
+      <a href="#endereco">endereco</a>
+      <a href="#forma_pagamento">forma_pagamento</a>
+      <a href="#log_auditoria">log_auditoria</a>
+      <a href="#municipio">municipio</a>
+      <a href="#orgao_judicial">orgao_judicial</a>
+      <a href="#pagamento">pagamento</a>
+      <a href="#parcela">parcela</a>
+      <a href="#parte">parte</a>
+      <a href="#parte_processo">parte_processo</a>
+      <a href="#prazo_processual">prazo_processual</a>
+      <a href="#processo">processo</a>
+      <a href="#telefone">telefone</a>
+      <a href="#usuario">usuario</a>
+    </nav>
+
+    <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+
+    <main class="main">
+      <section class="project-card">
+        <h1>Dicionário de Dados Governado</h1>
+        <div class="meta">Sistema de Gestão Contratual e Processos | Juliana Campos de Jesus Sociedade Individual de Advogados</div>
+        <p><strong>Escopo:</strong> Cadastro e gestão de clientes, contratos de honorários, processos judiciais, partes, audiências, prazos processuais, metadados de documentos, pagamentos, usuários e advogados, consentimento LGPD e trilha de auditoria em base MySQL única e centralizada.</p>
+        <p><strong>Tecnologia:</strong> MySQL 8.4 LTS (InnoDB, utf8mb4) — modelo lógico normalizado até 3FN.</p>
+        <p><strong>Responsáveis:</strong> João Victor de Jesus Silva (Data Owner — Regras de Negócio); Wendel Alves Viana (Data Steward — Qualidade Técnica e Dicionário). Professor Orientador: Prof. Dr. Diego Carvalho.</p>
+        <p><strong>Versão do DDL de referência:</strong> João e Wendel.sql (10/11/2026 21:21)</p>
+      </section>
+
+      <div class="control-panel">
+        <a class="btn btn-primary" href="docs/Especificacao_Requisitos_Regras_Negocio_BD.pdf" download>
+          <i class="fas fa-file-pdf"></i> Baixar Especificação de Requisitos (PDF)
+        </a>
+        <button class="btn btn-secondary" id="open-der">
+          <i class="fas fa-project-diagram"></i> Visualizar DER
+        </button>
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="search" id="search-input" placeholder="Filtrar tabelas ou colunas..." aria-label="Busca">
+        </div>
+      </div>
+
+      <!-- advogado -->
+      <section class="table-section" id="advogado">
+        <h2>advogado</h2>
+        <div class="table-desc">Profissional responsável pela representação e acompanhamento dos processos. Vinculado 1:1 a um usuário do sistema. Telefone removido desta tabela (agora em telefone).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_advogado</td>
+                <td>Identificador único do advogado.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema (surrogate key)</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">oab</td>
+                <td>Número da inscrição na OAB.</td>
+                <td>VARCHAR(20)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual (Administrador)</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">uf_oab</td>
+                <td>UF da inscrição na OAB (corrigido de of_oab).</td>
+                <td>CHAR(2)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">email</td>
+                <td>E-mail profissional.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Indicador de exclusão lógica (1=ativo, 0=inativo). RN10.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema / trigger de inativação</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_usuario</td>
+                <td>Usuário do sistema vinculado ao advogado (1:1).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → usuario.id_usuario]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">usuario</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- audiencia -->
+      <section class="table-section" id="audiencia">
+        <h2>audiencia</h2>
+        <div class="table-desc">Registro de audiências vinculadas a processos (data/hora, tipo, local, modalidade e status).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_audiencia</td>
+                <td>Identificador único da audiência.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_hora</td>
+                <td>Data e hora da audiência. Audiência AGENDADA não pode ser no passado (E203).</td>
+                <td>DATETIME</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_audiencia</td>
+                <td>Tipo da audiência (ex.: instrução, conciliação).</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">local_audiencia</td>
+                <td>Local físico ou virtual da audiência.</td>
+                <td>VARCHAR(512)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">modalidade</td>
+                <td>PRESENCIAL, VIRTUAL ou HIBRIDA (domínio esperado).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">status</td>
+                <td>AGENDADA, REALIZADA, ADIADA, CANCELADA (domínio esperado).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / atualização manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">observacao</td>
+                <td>Observações livres sobre a audiência.</td>
+                <td>TEXT</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica (RN10).</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">processo_id_processo</td>
+                <td>Processo ao qual a audiência pertence.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → processo.id_processo]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">processo</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- cliente -->
+      <section class="table-section" id="cliente">
+        <h2>cliente</h2>
+        <div class="table-desc">Pessoa física ou jurídica que contrata os serviços do escritório. Dados pessoais protegidos por LGPD (cifra + hash).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Identificador único do cliente.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_pessoa</td>
+                <td>PF ou PJ (domínio esperado ENUM).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_razao_social</td>
+                <td>Nome completo ou razão social.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">cpf_cnpj_cifrado</td>
+                <td>CPF/CNPJ cifrado (AES-256-GCM pela aplicação). Nunca em claro.</td>
+                <td>VARBINARY(255)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dps">[DPS]</span></td>
+                <td class="lineage">Aplicação (criptografia)</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">cpf_cnpj_hash</td>
+                <td>Hash do CPF/CNPJ para unicidade e busca sem exposição (RN15).</td>
+                <td>CHAR(64)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dps">[DPS]</span></td>
+                <td class="lineage">Aplicação (hash)</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">email</td>
+                <td>E-mail de contato do cliente.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_cadastro</td>
+                <td>Data/hora de criação do registro.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Todos os perfis com leitura da tabela</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica (RN10). Cliente com contrato/processo ativo só pode ser inativado.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- comarca -->
+      <section class="table-section" id="comarca">
+        <h2>comarca</h2>
+        <div class="table-desc">Tabela de domínio das comarcas e tribunais.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_comarca</td>
+                <td>Identificador único da comarca.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema / carga de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_comarca</td>
+                <td>Nome da comarca.</td>
+                <td>VARCHAR(150)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tribunal</td>
+                <td>Tribunal ao qual a comarca pertence.</td>
+                <td>VARCHAR(150)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- consentimento_lgpd -->
+      <section class="table-section" id="consentimento_lgpd">
+        <h2>consentimento_lgpd</h2>
+        <div class="table-desc">Registro de consentimento ou base legal do titular para tratamento de dados (LGPD). id_parte e id_cliente agora opcionais.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_consentimento_lgpd</td>
+                <td>Identificador único do registro de consentimento.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U; Advogado: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">finalidade</td>
+                <td>Finalidade do tratamento de dados.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual (Administrador)</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">base_legal</td>
+                <td>Base legal do tratamento.</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_consentimento</td>
+                <td>Data do consentimento.</td>
+                <td>DATETIME</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_revogacao</td>
+                <td>Data de revogação do consentimento (acento removido).</td>
+                <td>DATETIME</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / atualização manual</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">versao_termo</td>
+                <td>Versão do termo de consentimento aceito.</td>
+                <td>VARCHAR(30)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_parte</td>
+                <td>Parte vinculada (opcional).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → parte.id_parte]</span> NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">parte</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Cliente titular dos dados (opcional).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → cliente.id_cliente]</span> NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">cliente</td>
+                <td class="rbac">Administrador: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- contrato -->
+      <section class="table-section" id="contrato">
+        <h2>contrato</h2>
+        <div class="table-desc">Contrato de honorários firmado entre o escritório e o cliente. Ordem obrigatória: cliente → contrato → processo/parcelas.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_contrato</td>
+                <td>Identificador único do contrato.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">valor_total</td>
+                <td>Valor total dos honorários. Deve ser &gt; 0. Imutável após primeiro pagamento (RN09).</td>
+                <td>DECIMAL(10)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_inicio</td>
+                <td>Data de início de vigência.</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_fim</td>
+                <td>Data de término (pode ser nula). data_fim &gt;= data_inicio (E302).</td>
+                <td>DATE</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / atualização</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">status</td>
+                <td>ABERTO, EM_ANDAMENTO, ENCERRADO, CANCELADO (RN08). Tipo INT no DDL — deveria ser ENUM.</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / trigger de transição</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">descricao_servico</td>
+                <td>Descrição dos serviços contratados.</td>
+                <td>TEXT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_cadastro</td>
+                <td>Data/hora de criação.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Todos com leitura</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica (RN10).</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_advogado</td>
+                <td>Advogado responsável pelo contrato.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → advogado.id_advogado]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">advogado</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Cliente contratante (RN01).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → cliente.id_cliente]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">cliente</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- documento -->
+      <section class="table-section" id="documento">
+        <h2>documento</h2>
+        <div class="table-desc">Metadados de documentos vinculados a processo ou contrato (pelo menos um deve ser informado — RN17). Arquivo físico em repositório externo. PK com AUTO_INCREMENT; FKs opcionais.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_documento</td>
+                <td>Identificador único do documento (AUTO_INCREMENT).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL AUTO_INCREMENT</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_processo</td>
+                <td>Processo vinculado (opcional).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → processo.id_processo]</span> NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">processo</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_contrato</td>
+                <td>Contrato vinculado (opcional).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → contrato.id_contrato]</span> NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">contrato</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_documento</td>
+                <td>Nome legível do documento.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Upload / cadastro</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_documento</td>
+                <td>Tipo (petição, procuração, sentença etc.).</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">caminho_arquivo</td>
+                <td>Caminho no repositório externo. Único.</td>
+                <td>VARCHAR(512)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema de arquivos externo</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">hash_sha256</td>
+                <td>Hash SHA-256 do arquivo para integridade (obrigatório RN17).</td>
+                <td>CHAR(64)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Aplicação no upload</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tamanho_bytes</td>
+                <td>Tamanho do arquivo em bytes.</td>
+                <td>BIGINT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema de arquivos</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_upload</td>
+                <td>Data/hora do upload.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Todos com leitura</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_usuario</td>
+                <td>Usuário que realizou o upload.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → usuario.id_usuario]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">usuario</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- endereco -->
+      <section class="table-section" id="endereco">
+        <h2>endereco</h2>
+        <div class="table-desc">Endereços residenciais, comerciais ou de correspondência vinculados ao cliente (1:N).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_endereco</td>
+                <td>Identificador único do endereço.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">logradouro</td>
+                <td>Logradouro (rua, avenida etc.).</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">numero_logradouro</td>
+                <td>Número do imóvel.</td>
+                <td>VARCHAR(20)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">complemento</td>
+                <td>Complemento (apto, sala etc.).</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">bairro</td>
+                <td>Bairro.</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">cep</td>
+                <td>CEP (8 dígitos).</td>
+                <td>CHAR(8)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_endereco</td>
+                <td>Residencial, comercial, correspondência etc.</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Cliente proprietário do endereço.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → cliente.id_cliente]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">cliente</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_municipio</td>
+                <td>Município do endereço.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → municipio.id_municipio]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">municipio</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- forma_pagamento -->
+      <section class="table-section" id="forma_pagamento">
+        <h2>forma_pagamento</h2>
+        <div class="table-desc">Tabela de domínio das formas de pagamento aceitas.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_forma_pagamento</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema / carga de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">descricao</td>
+                <td>Descrição da forma (Pix, boleto, transferência etc.).</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- log_auditoria -->
+      <section class="table-section" id="log_auditoria">
+        <h2>log_auditoria</h2>
+        <div class="table-desc">Trilha de auditoria append-only de todas as operações de negócio (RN11, RNF13). PK agora BIGINT AUTO_INCREMENT.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_log_auditoria</td>
+                <td>Identificador único (BIGINT AUTO_INCREMENT).</td>
+                <td>BIGINT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL AUTO_INCREMENT</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema (trigger)</td>
+                <td class="rbac">Administrador: R apenas</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tabela_afetada</td>
+                <td>Nome da tabela modificada.</td>
+                <td>VARCHAR(46)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Trigger AFTER INSERT/UPDATE</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_registro_afetado</td>
+                <td>PK do registro afetado.</td>
+                <td>BIGINT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Trigger</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">operacao</td>
+                <td>INSERT, UPDATE ou INATIVACAO.</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Trigger</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_hora_operacao</td>
+                <td>Timestamp da operação.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">valor_anterior</td>
+                <td>JSON com valores anteriores (dados pessoais mascarados).</td>
+                <td>JSON</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Trigger (mascaramento)</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">valor_novo</td>
+                <td>JSON com valores novos (dados pessoais mascarados).</td>
+                <td>JSON</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Trigger (mascaramento)</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_usuario</td>
+                <td>Usuário responsável pela operação.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → usuario.id_usuario]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">usuario / sessão</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- municipio -->
+      <section class="table-section" id="municipio">
+        <h2>municipio</h2>
+        <div class="table-desc">Tabela de domínio dos municípios brasileiros (código IBGE).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_municipio</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema / carga IBGE</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">codigo_ibge</td>
+                <td>Código IBGE do município (7 dígitos).</td>
+                <td>CHAR(7)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga IBGE</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_municipio</td>
+                <td>Nome do município.</td>
+                <td>VARCHAR(150)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga IBGE</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">uf</td>
+                <td>Sigla da Unidade Federativa.</td>
+                <td>CHAR(2)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Carga IBGE</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- orgao_judicial -->
+      <section class="table-section" id="orgao_judicial">
+        <h2>orgao_judicial</h2>
+        <div class="table-desc">Vara ou órgão judicial vinculado a uma comarca.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_orgao_judicial</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_vara</td>
+                <td>Nome da vara ou órgão.</td>
+                <td>VARCHAR(150)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro de domínio</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_comarca</td>
+                <td>Comarca à qual o órgão pertence.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → comarca.id_comarca]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">comarca</td>
+                <td class="rbac">Administrador: C R U E; demais: R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- pagamento -->
+      <section class="table-section" id="pagamento">
+        <h2>pagamento</h2>
+        <div class="table-desc">Pagamento efetivamente realizado de uma parcela. Valor &gt; 0; soma não pode exceder valor_total do contrato (RN12). PK com AUTO_INCREMENT.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_pagamento</td>
+                <td>Identificador único (AUTO_INCREMENT).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL AUTO_INCREMENT</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">valor_pago</td>
+                <td>Valor efetivamente pago (deve ser &gt; 0 — E402).</td>
+                <td>DECIMAL(10)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_pagamento</td>
+                <td>Data do pagamento (não posterior à data atual).</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_cadastro</td>
+                <td>Data/hora de registro.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Todos com leitura</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_parcela</td>
+                <td>Parcela à qual o pagamento se refere.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → parcela.id_parcela]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">parcela</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_forma_pagamento</td>
+                <td>Forma de pagamento utilizada.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → forma_pagamento.id_forma_pagamento]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">forma_pagamento</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- parcela -->
+      <section class="table-section" id="parcela">
+        <h2>parcela</h2>
+        <div class="table-desc">Parcela planejada de pagamento de um contrato. Soma dos valores deve igualar valor_total ao mudar status para EM_ANDAMENTO (RN13). PK com AUTO_INCREMENT.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_parcela</td>
+                <td>Identificador único (AUTO_INCREMENT).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL AUTO_INCREMENT</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">numero_parcela</td>
+                <td>Número sequencial da parcela no contrato. Recomenda-se UNIQUE composta (id_contrato, numero_parcela).</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">valor_parcela</td>
+                <td>Valor da parcela (deve ser &gt; 0).</td>
+                <td>DECIMAL(10)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_vencimento</td>
+                <td>Data de vencimento da parcela.</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_contrato</td>
+                <td>Contrato ao qual a parcela pertence.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → contrato.id_contrato]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">contrato</td>
+                <td class="rbac">Administrador: C R U E; Assistente: C R</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- parte -->
+      <section class="table-section" id="parte">
+        <h2>parte</h2>
+        <div class="table-desc">Pessoa física ou jurídica que participa de processos (cadastrada uma única vez). Pode ou não ser o próprio cliente.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_parte</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_pessoa</td>
+                <td>PF ou PJ.</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome_razao_social</td>
+                <td>Nome ou razão social da parte.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">cpf_cnpj_cifrado</td>
+                <td>CPF/CNPJ cifrado.</td>
+                <td>VARBINARY(255)</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dps">[DPS]</span></td>
+                <td class="lineage">Aplicação (criptografia)</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">cpf_cnpj_hash</td>
+                <td>Hash para unicidade (RN15).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NULL DEFAULT NULL</td>
+                <td><span class="badge badge-dps">[DPS]</span></td>
+                <td class="lineage">Aplicação (hash)</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Cliente vinculado (quando a parte é o próprio cliente). NOT NULL no DDL atual.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → cliente.id_cliente]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">cliente</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- parte_processo -->
+      <section class="table-section" id="parte_processo">
+        <h2>parte_processo</h2>
+        <div class="table-desc">Participação de uma parte em um processo (autor, réu, interessado etc.), com definição de polo.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_parte_processo</td>
+                <td>Identificador único da participação.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_parte</td>
+                <td>Tipo da participação (autor, réu, interessado etc.).</td>
+                <td>VARCHAR(50)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">polo</td>
+                <td>ATIVO, PASSIVO ou TERCEIRO.</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_processo</td>
+                <td>Processo da participação.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → processo.id_processo]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">processo</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_parte</td>
+                <td>Parte participante.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → parte.id_parte]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">parte</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- prazo_processual -->
+      <section class="table-section" id="prazo_processual">
+        <h2>prazo_processual</h2>
+        <div class="table-desc">Prazos e tarefas processuais vinculados a processos, com data limite e status (RN16, PR04).</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_prazo_processual</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">descricao_tarefa</td>
+                <td>Descrição da tarefa ou prazo.</td>
+                <td>TEXT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_publicacao</td>
+                <td>Data de publicação do ato que originou o prazo.</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">dias_prazo</td>
+                <td>Quantidade de dias do prazo.</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_contagem</td>
+                <td>Tipo de contagem (úteis ou corridos). INT no DDL — deveria ser ENUM.</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_limite</td>
+                <td>Data limite para cumprimento (deve ser &gt; data_publicacao — RN02).</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / cálculo aplicação</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">status</td>
+                <td>PENDENTE, CUMPRIDO, VENCIDO, CANCELADO (RN16).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / EVENT diário</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_conclusao</td>
+                <td>Data de conclusão do prazo (quando CUMPRIDO).</td>
+                <td>DATETIME</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Atualização manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_processo</td>
+                <td>Processo ao qual o prazo pertence.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → processo.id_processo]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">processo</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_usuario</td>
+                <td>Usuário responsável pelo registro/acompanhamento.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → usuario.id_usuario]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">usuario</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- processo -->
+      <section class="table-section" id="processo">
+        <h2>processo</h2>
+        <div class="table-desc">Caso jurídico cadastrado e acompanhado pelo escritório. Vinculado a exatamente um contrato (RN05). descricao corrigida para TEXT; data_cadastro adicionada.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_processo</td>
+                <td>Identificador único.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">numero_processo</td>
+                <td>Número CNJ (20 dígitos). Único e imutável após INSERT (RN09, RN15).</td>
+                <td>CHAR(20)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_acao</td>
+                <td>Tipo da ação judicial. Imutável após INSERT (RN09).</td>
+                <td>VARCHAR(150)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">area_direito</td>
+                <td>Área do direito. Imutável após INSERT (RN09).</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_distribuicao</td>
+                <td>Data de distribuição (não posterior à data atual — RN02). Imutável.</td>
+                <td>DATE</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">status</td>
+                <td>ABERTO, EM_ANDAMENTO, ENCERRADO, CANCELADO (RN07). Tipo INT no DDL — deveria ser ENUM.</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro / trigger de transição</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">descricao</td>
+                <td>Descrição do processo (corrigido de TIMESTAMP para TEXT).</td>
+                <td>TEXT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador / Advogado: C R U E; Assistente: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_contrato</td>
+                <td>Contrato ao qual o processo pertence (RN05). Imutável (RN09).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → contrato.id_contrato]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">contrato</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_advogado</td>
+                <td>Advogado responsável pelo processo.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → advogado.id_advogado]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">advogado</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_orgao_judicial</td>
+                <td>Órgão judicial do processo.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → orgao_judicial.id_orgao_judicial]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">orgao_judicial</td>
+                <td class="rbac">Administrador / Advogado: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_cadastro</td>
+                <td>Data/hora de cadastro do processo (coluna adicionada nesta versão).</td>
+                <td>DATETIME</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Todos com leitura</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- telefone -->
+      <section class="table-section" id="telefone">
+        <h2>telefone</h2>
+        <div class="table-desc">Telefones de contato. Tabela renomeada de telefone_cliente. Agora possui FKs para cliente e para advogado.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_telefone_cliente</td>
+                <td>Identificador único do telefone (nome de coluna mantido do modelo anterior).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">numero_telefone</td>
+                <td>Número do telefone.</td>
+                <td>VARCHAR(20)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tipo_telefone</td>
+                <td>Tipo (celular, fixo, comercial etc.).</td>
+                <td>VARCHAR(45)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">principal</td>
+                <td>Indicador de telefone principal (corrigido para TINYINT(1)).</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica.</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">id_cliente</td>
+                <td>Cliente proprietário do telefone.</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → cliente.id_cliente]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">cliente</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">advogado_id_advogado</td>
+                <td>Advogado vinculado ao telefone (nova FK nesta versão).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="fk">[FK → advogado.id_advogado]</span> NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">advogado</td>
+                <td class="rbac">Administrador: C R U E; Advogado / Assistente: C R U</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- usuario -->
+      <section class="table-section" id="usuario">
+        <h2>usuario</h2>
+        <div class="table-desc">Usuários do sistema com perfil de acesso (ADMINISTRADOR, ADVOGADO, ASSISTENTE). Senha armazenada apenas como hash Argon2id. PK com AUTO_INCREMENT; data_bloqueio_ate corrigida.</div>
+        <div class="table-wrap">
+          <table class="dict">
+            <thead>
+              <tr>
+                <th>Atributo</th>
+                <th>Descrição / Regra de Negócio</th>
+                <th>Tipo e Tamanho</th>
+                <th>Constraints</th>
+                <th>Privacidade</th>
+                <th>Linhagem</th>
+                <th>Controle de Acesso (RBAC)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="attr-name">id_usuario</td>
+                <td>Identificador único (AUTO_INCREMENT).</td>
+                <td>INT</td>
+                <td class="constraint"><span class="pk">[PK]</span> NOT NULL AUTO_INCREMENT</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">nome</td>
+                <td>Nome completo do usuário.</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E; Advogado: R (próprio)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">login</td>
+                <td>Login único de autenticação.</td>
+                <td>VARCHAR(100)</td>
+                <td class="constraint"><span class="uq">[UNIQUE]</span> NOT NULL</td>
+                <td><span class="badge badge-dp">[DP]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">senha_hash</td>
+                <td>Hash Argon2id da senha (nunca texto claro — RNF10).</td>
+                <td>VARCHAR(255)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-dps">[DPS]</span></td>
+                <td class="lineage">Aplicação (Argon2id)</td>
+                <td class="rbac">Administrador: C U (nunca R em claro)</td>
+              </tr>
+              <tr>
+                <td class="attr-name">perfil</td>
+                <td>Perfil de acesso. INT no DDL — deveria ser ENUM('ADMINISTRADOR','ADVOGADO','ASSISTENTE').</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Cadastro manual</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_cadastro</td>
+                <td>Data/hora de criação.</td>
+                <td>TIMESTAMP</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_ultimo_acesso</td>
+                <td>Data/hora do último acesso bem-sucedido.</td>
+                <td>DATETIME</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Aplicação (login)</td>
+                <td class="rbac">Administrador: R</td>
+              </tr>
+              <tr>
+                <td class="attr-name">tentativas_falhas</td>
+                <td>Contador de tentativas de login falhas (bloqueio temporário).</td>
+                <td>INT</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Aplicação (login)</td>
+                <td class="rbac">Administrador: R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">data_bloqueio_ate</td>
+                <td>Data até a qual o usuário permanece bloqueado (corrigido de data_bloquei_ate).</td>
+                <td>DATETIME</td>
+                <td class="constraint">NULL DEFAULT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Aplicação (login)</td>
+                <td class="rbac">Administrador: R U</td>
+              </tr>
+              <tr>
+                <td class="attr-name">ativo</td>
+                <td>Exclusão lógica (RN10).</td>
+                <td>TINYINT(1)</td>
+                <td class="constraint">NOT NULL</td>
+                <td><span class="badge badge-na">[N/A]</span></td>
+                <td class="lineage">Sistema</td>
+                <td class="rbac">Administrador: C R U E</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Dicionário de Dados — Sistema de Gestão Contratual | Gerado para fins acadêmicos | Universidade Cidade de São Paulo — 2026<br>
+        Data Owner: João Victor de Jesus Silva | Data Steward: Wendel Alves Viana | Orientador: Prof. Dr. Diego Carvalho<br>
+        DDL de referência: João e Wendel.sql (10/11/2026 21:21)
+      </footer>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="der-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Diagrama Entidade-Relacionamento (DER)</h3>
+        <button class="modal-close" id="close-der" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="der-container">
+          <img id="der-img" src="assets/der.png" alt="Diagrama Entidade-Relacionamento">
+        </div>
+        <div class="zoom-controls">
+          <button id="zoom-in" title="Zoom +">+</button>
+          <button id="zoom-out" title="Zoom -">−</button>
+          <button id="zoom-reset" title="Reset">⟲</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
